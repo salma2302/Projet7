@@ -44,6 +44,7 @@ def ids_route():
 def get_client(id_client: int):
     # récupérer les données de la base de données en utilisant l'id_client
     X = df[df["SK_ID_CURR"] == id_client]
+    X = X[features_selected]
     
     
     # vérifier si les données ont été trouvées
