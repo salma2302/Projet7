@@ -45,10 +45,22 @@ id_selected = st.sidebar.selectbox("Choix de l'id du client", options=id_client)
 # Appeler la route qui retourne la liste des colonnes
 res_col = requests.get("http://localhost:8000/columns")
 columns = res_col.json()["columns"]
-columns_selected1 = st.sidebar.selectbox("Choisissez la colonne n°1", options=columns)
-columns_selected2 = st.sidebar.selectbox("Choisissez la colonne n°2", options=columns)
+
+
 #ligne = df[df['SK_ID_CURR'] == id_selected]
 
+# On crée la première liste déroulante
+columns_selected1 = st.sidebar.selectbox('Sélectionnez la première variable :', options=columns)
+columns_disponibles = columns.copy()
+
+# Enlever la variable sélectionnée de la liste des variables disponibles
+columns_disponibles.remove(columns_selected1)
+
+# Utiliser la liste des variables disponibles pour afficher la deuxième liste déroulante
+columns_selected2 = st.sidebar.selectbox('Sélectionnez la deuxième variable :', options=columns_disponibles)
+
+# Afficher les variables sélectionnées
+st.write('Vous avez sélectionné les variables suivantes :', columns_selected1, 'et', columns_selected2)
 
 
 # L'inputs 
@@ -64,7 +76,7 @@ if response_client.status_code == 200:
     client_data = response_client.json()[0]
     
     client_data = pd.DataFrame.from_dict(client_data, orient='index').transpose()
-    st.write(client_data)
+    #st.write(client_data)
 else:
     st.error("Error getting client data")
     
@@ -166,6 +178,18 @@ if st.sidebar.button("Features importance") :
 
         st.subheader("Valeurs SHAP")
         st.pyplot(shap.summary_plot(shap_values, X_test, feature_names=X_test.columns.tolist()))
+        
+        
+        shap_val = shap_explainer.shap_values(client_data)
+        # Créer un trace Plotly avec les données de l'explication SHAP
+
+        # Afficher le trace avec st.plotly_chart
+        shap.plots._waterfall.waterfall_legacy(shap_explainer.expected_value[0],
+                                               shap_val[0][0],
+                                               feature_names = client_data.columns,
+                                                max_display= 10, ) 
+        st.pyplot()
+        st.set_option('deprecation.showPyplotGlobalUse', False)
 
         
     else :
