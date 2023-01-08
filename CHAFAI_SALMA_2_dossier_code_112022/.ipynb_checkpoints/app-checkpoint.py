@@ -88,10 +88,10 @@ def predict(id_client: int):
     pred_proba = classifier.predict_proba(X_test)
     
     # Map prediction to appropriate label
-    prediction_label = ["Crédit accordé" if prediction == 0 else "Crédit refusé"]
+    prediction_label = ["accordé" if prediction == 0 else "refusé"]
     # Return response back to client
     return {"prediction": prediction_label[0],
-           "probabilité" : max(pred_proba[0])}
+           "probabilité" : round(max(pred_proba[0]),2)}
 
 
 # A revoir
@@ -114,42 +114,7 @@ def get_data():
     return {"data": data}
 
 
-@app.post("/predict_explainer/{id_client}")
-def predict_explain(id_client: int) :
-    # Récupérer les données d'entrée pour le client sélectionné
-    #ligne = df[df["SK_ID_CURR"] == id_client]
-    X_test = df[features_selected]
-    X_test = X_test.to_dict(orient="records")
-
-    # Calculer les valeurs SHAP pour les prédictions de test
-    shap_values = shap_explainer.shap_values(X_test)
-
-    # Construire un dictionnaire contenant les explications de modèle
-    return {"X_test": X_test.tolist(), "shap_values": shap_values}
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#@app.get("/explainer")
-#def get_explainer():
-#    explainer = shap.TreeExplainer(classifier)
-#    explainer_dict = explainer.to_dict()
-#    return explainer_dict
-
-# 5. Run the API with uvicorn
-#    Will run on http://127.0.0.1:8000
 if __name__ == '__main__':
     uvicorn.run(app, host='127.0.0.1', port=8000)
